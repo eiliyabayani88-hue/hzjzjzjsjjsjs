@@ -8,12 +8,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
       - name: Extract project
-        run: unzip ILIA_AI_APK_BUILDER.zip -d project
-      - name: Find project files
-        run: find project -maxdepth 4 -type f
+        run: unzip -q ILIA_AI_APK_BUILDER.zip
+
+      - name: Build APK
+        run: cd ILIA_AI_APK_BUILDER && gradle --no-daemon assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ILIA-AI-APK
+          path: ILIA_AI_APK_BUILDER/app/build/outputs/apk/debug/app-debug.apk
